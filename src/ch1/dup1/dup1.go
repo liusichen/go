@@ -7,10 +7,9 @@ import "os"
 func main() {
 	counts := make(map[string]int)
 	input := bufio.NewScanner(os.Stdin)
-	var ceil int
-	for input.Scan()&&ceil < 10  {
+	input.Split(bufio.ScanLines)
+	for input.Scan() {
 		counts[input.Text()]++
-		ceil++
 	}
 
 	for line, n := range counts {
