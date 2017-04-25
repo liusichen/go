@@ -1,0 +1,25 @@
+package main
+
+import "fmt"
+import "os"
+import "ch4/compare"
+
+func main() {
+	if len(os.Args) > 2 {
+		fmt.Printf("need two string\n")
+	}
+	str := [...]string{"add", "delete"}
+	compareStr := [...]string{"add", "delete"}
+
+	fmt.Println(&str[1], str[1], len(str[1]))
+	str[1] = "dsfdf"
+	fmt.Println(&str[1], str[1], len(str[1]))
+	sliceStr := str[:]
+	sliceCompareStr := compareStr[:]
+	fmt.Println(compare.StringEqual(sliceStr, sliceCompareStr))
+
+	tmp := "abced"
+	fmt.Println(&tmp, tmp)
+	tmp = "2rwer"
+	fmt.Println(&tmp, tmp)
+}
