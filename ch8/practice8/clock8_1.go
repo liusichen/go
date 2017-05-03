@@ -4,16 +4,16 @@ import "net"
 import "io"
 import "log"
 import "time"
-import "os"
+
+import "flag"
+
+var port = flag.String("port", "8000", "the port server use")
 
 func main() {
 	ipaddr := "localhost"
-	if len(os.Args) != 2 {
-		log.Printf("<Usage> go run [port]\n")
-		os.Exit(1)
-	}
-	port := os.Args[1]
-	tcpHead := ipaddr + ":" + port
+	flag.Parse()
+
+	tcpHead := ipaddr + ":" + *port
 	listener, err := net.Listen("tcp", tcpHead)
 	if err != nil {
 		log.Fatal(err)
