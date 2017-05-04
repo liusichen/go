@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -14,12 +15,14 @@ func main() {
 			fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
 			continue
 		}
-		b, err := ioutil.ReadAll(resq.Body)
+		data, _ := ioutil.ReadAll(resq.Body)
+		var sn []struct{ SN string }
+		err = json.Unmarshal(data, &sn)
 		resq.Body.Close()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "fetch: reading %s: %v\n", url, err)
 			continue
 		}
-		fmt.Printf("%s\n", b)
+		fmt.Printf("%s\n", sn)
 	}
 }
