@@ -24,7 +24,7 @@ func main() {
 func handleConn(connect net.Conn) {
 	defer connect.Close()
 	for {
-		_, err := io.WriteString(connect, time.Now().Format("15:04:01\n"))
+		_, err := io.WriteString(connect, time.Now().Format("15:04:05\n"))
 		if err != nil {
 			return
 		}
