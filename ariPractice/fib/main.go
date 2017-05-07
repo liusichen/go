@@ -1,11 +1,18 @@
 package main
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strconv"
+)
 
 func main() {
-	var order int
-	fmt.Scanf("%d", &order)
-	fmt.Println(fib(order))
+	input := bufio.NewScanner(os.Stdin)
+	for input.Scan() {
+		num, _ := strconv.Atoi(input.Text())
+		fmt.Println(fib(num))
+	}
 }
 
 func fib(n int) int {
