@@ -22,8 +22,14 @@ func spinner(delay time.Duration) {
 }
 
 func fib(x int) int {
-	if x < 2 {
-		return x
+	if x == 0 || x == 1 {
+		return 0
 	}
-	return fib(x-1) + fib(x-2)
+	var fib = make([]int, x+1)
+	fib[0] = 0
+	fib[1] = 1
+	for n := 2; n <= x; n++ {
+		fib[n] = fib[n-1] + fib[n-2]
+	}
+	return fib[x]
 }
