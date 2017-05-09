@@ -10,11 +10,16 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
+
+	"github.com/tidwall/gjson"
 )
 
 var IPToSNMap = make(map[string]string)
 var SNToipMap = make(map[string]map[string][]string)
+var IPtoIDCName = make(map[string]string)
+var IDCNametoIP = make(map[string][]string)
 
 type wantValue struct {
 	SN             string
@@ -30,7 +35,7 @@ func main() {
 		if bdutils.InSlice("boxinfowithidc", urlSlice) == true {
 			boxinfoURL(url)
 		} else if bdutils.InSlice("?appkey=sync_vidc", urlSlice) == true {
-			//TODO:iptoWeigt and weightoIP map
+			vidcURL(url)
 		} else {
 			log.Println("the URL cannot be handle.")
 		}
@@ -63,6 +68,41 @@ func boxinfoURL(url string) {
 			}
 		}
 	}
+}
+
+func vidcURL(url string) {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+	resq, err := client.Get(url)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "vidc:%v\n", err)
+	}
+	vidcData, _ := ioutil.ReadAll(resq.Body)
+	defer resq.Body.Close()
+	for i := 1; ; i += 2 {
+		idcNum := strconv.Itoa(i)
+		getName := idcNum + ".name"
+		getHost := idcNum + ".hosts.#.ip"
+		nameValue := gjson.Get(string(vidcData), getName)
+		hostValue := gjson.Get(string(vidcData), getHost)
+
+		if nameValue.Index == 0 {
+			break
+		}
+		setIPtoIDC(nameValue, hostValue)
+		setIDCtoIPs(nameValue, hostValue)
+		for ip, name := range IPtoIDCName {
+			fmt.Printf("%s\t%s\n", ip, name)
+		}
+		for name, ips := range IDCNametoIP {
+			for _, ip := range ips {
+				fmt.Printf("%s\t%s\n", name, ip)
+			}
+		}
+	}
+
 }
 
 //SetIPtoSNMap creates a map which the key is IP and the value is SN
@@ -112,5 +152,19 @@ func SetSNtoIPMap(oneValue wantValue) {
 		if net.ParseIP(pubIP) != nil {
 			publicIP["2"] = append(publicIP["2"], pubIP)
 		}
+	}
+}
+
+func setIPtoIDC(nameValue, hostValue gjson.Result) {
+	name := nameValue.String()
+	for _, ip := range hostValue.Array() {
+		IPtoIDCName[ip.String()] = name
+	}
+}
+
+func setIDCtoIPs(nameValue, hostValue gjson.Result) {
+	name := nameValue.String()
+	for _, ip := range hostValue.Array() {
+		IDCNametoIP[name] = append(IDCNametoIP[name], ip.String())
 	}
 }
